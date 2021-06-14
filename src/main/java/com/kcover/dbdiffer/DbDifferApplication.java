@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
+import java.io.File;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.Map;
@@ -20,33 +21,21 @@ public class DbDifferApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(DbDifferApplication.class, args);
 		System.out.println("Started");
-		DriverManagerDataSource dataSource = new DriverManagerDataSource();
-		dataSource.setDriverClassName("org.postgresql.Driver");
-		dataSource.setUrl("jdbc:postgresql://localhost:5432/old");
-		dataSource.setUsername("old");
-		dataSource.setPassword("hehehe");
-		JdbcTemplate template = new JdbcTemplate(dataSource);
+		DriverManagerDataSource oldDbDataSource = new DriverManagerDataSource();
+		oldDbDataSource.setDriverClassName("org.postgresql.Driver");
+		oldDbDataSource.setUrl("jdbc:postgresql://localhost:5432/old");
+		oldDbDataSource.setUsername("old");
+		oldDbDataSource.setPassword("hehehe");
+		JdbcTemplate oldDbTemplate = new JdbcTemplate(oldDbDataSource);
 
-		Integer count = template.queryForObject("SELECT COUNT(id) FROM accounts", Integer.class);
-		LOGGER.info("COUNT WAS: " + count);
+		DriverManagerDataSource newDbDataSource = new DriverManagerDataSource();
+		newDbDataSource.setDriverClassName("org.postgresql.Driver");
+		newDbDataSource.setUrl("jdbc:postgresql://localhost:5433/new");
+		newDbDataSource.setUsername("new");
+		newDbDataSource.setPassword("hahaha");
+		JdbcTemplate newDbTemplate = new JdbcTemplate(newDbDataSource);
 
-		List<Account> accountMap =
-				template
-				.queryForList("SELECT * FROM accounts ORDER BY id LIMIT 5")
-				.stream().map(DbDifferApplication::mapToAccount)
-				.collect(Collectors.toList());
-		LOGGER.info("FIRST FIVE WERE: " + accountMap);
-	}
-
-	public static Account mapToAccount(Map<String, Object> map){
-		var id = map.get("id");
-		var name = map.get("name");
-		var email = map.get("email");
-		if(id instanceof String && name instanceof String && email instanceof String) {
-			return new Account((String) id,(String) name,(String) email);
-		} else {
-			throw new RuntimeException("Failed to convert map to Account: " + map);
-		}
+		DiffFinder.writeMissingRecordsToFile(oldDbTemplate, newDbTemplate, 1000, new File("missing.txt"));
 	}
 
 

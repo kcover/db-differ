@@ -4,6 +4,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -45,6 +46,22 @@ public class Account {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public static Account fromMap(Map<String, Object> map){
+        var id = map.get("id");
+        var name = map.get("name");
+        var email = map.get("email");
+        if(!(id instanceof String)){
+            throw new RuntimeException("ID was unexpected type of: " + id.getClass());
+        }
+        if(!(name instanceof String)){
+            throw new RuntimeException("ID was unexpected type of: " + id.getClass());
+        }
+        if(!(email instanceof String)){
+            throw new RuntimeException("ID was unexpected type of: " + id.getClass());
+        }
+        return new Account((String) id,(String) name,(String) email);
     }
 
     @Override
