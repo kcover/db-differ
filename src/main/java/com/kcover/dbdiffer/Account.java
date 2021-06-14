@@ -1,9 +1,7 @@
-package com.kcover.dbdiffer.jpa;
+package com.kcover.dbdiffer;
 
-import org.hibernate.annotations.FetchProfile;
-
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.util.Objects;
@@ -12,27 +10,24 @@ import java.util.UUID;
 /**
  * A POJO for interacting with accounts.
  */
-@Entity
-@Table(name="accounts")
 public class Account {
-    @Id
-    private UUID id;
+    private String id;
     private String name;
     private String email;
 
     public Account() {}
 
-    public Account(UUID id, String name, String email) {
+    public Account(String id, String name, String email) {
         this.id = id;
         this.name = name;
         this.email = email;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 
