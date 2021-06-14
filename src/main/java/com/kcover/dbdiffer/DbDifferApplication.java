@@ -35,7 +35,8 @@ public class DbDifferApplication {
 		newDbDataSource.setPassword("hahaha");
 		JdbcTemplate newDbTemplate = new JdbcTemplate(newDbDataSource);
 
-		DiffFinder.writeMissingRecordsToFile(oldDbTemplate, newDbTemplate, 1000, new File("missing.txt"));
+		DiffFinder.writeMissingAccountsToFile(oldDbTemplate, newDbTemplate, 1000, new File("missing.txt"));
+		DiffFinder.writeCorruptedAccountsToFile(oldDbTemplate, newDbTemplate, 1000, new File("corrupted.txt"));
 	}
 
 

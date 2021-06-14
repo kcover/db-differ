@@ -2,6 +2,7 @@ package com.kcover.dbdiffer;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -26,35 +27,58 @@ class DiffFinderTest {
         }
     }
 
-    //missing records are 0004ddc3-e99a-419e-b14b-e91a2138416e, 000846f0-1043-414e-8ad2-7ad4955c6833
-    @Test
-    void testFindMissingEntries() throws Exception{
-        //setup DBs
-        JdbcTemplate oldDbTemplate = createJdbcTemplate();
-        JdbcTemplate newDbTemplate = createJdbcTemplate();
+    private static JdbcTemplate oldDbTemplate;
+    private static JdbcTemplate newDbTemplate;
+
+    @BeforeAll
+    static void beforeAll() throws IOException {
+        oldDbTemplate = createJdbcTemplate();
         String oldSql = IOUtils.toString(getResourceAsStream("oldDbData.sql"), StandardCharsets.UTF_8);
         oldDbTemplate.execute(oldSql);
+        newDbTemplate = createJdbcTemplate();
         String newSql = IOUtils.toString(getResourceAsStream("newDbData.sql"), StandardCharsets.UTF_8);
         newDbTemplate.execute(newSql);
+    }
 
+    @Test
+    void testFindMissingEntries() throws Exception{
         File outputFile = Files.createTempFile(null, ".txt").toFile();
         int pageSize = 100;
-        DiffFinder.writeMissingRecordsToFile(oldDbTemplate, newDbTemplate, pageSize, outputFile);
+        DiffFinder.writeMissingAccountsToFile(oldDbTemplate, newDbTemplate, pageSize, outputFile);
 
         String outputFileString;
         try(FileReader reader = new FileReader(outputFile)){
             outputFileString = IOUtils.toString(reader);
         }
-        String expectedFileString = IOUtils.toString(getResourceAsStream("missingRecordsExpected.txt"), StandardCharsets.UTF_8);
+        String expectedFileString = IOUtils.toString(getResourceAsStream("missingAccountsExpected.txt"), StandardCharsets.UTF_8);
 
         assertThat(outputFileString, Matchers.is(expectedFileString));
     }
 
-    private InputStream getResourceAsStream(String resource){
-        return this.getClass().getClassLoader().getResourceAsStream(resource);
+    @Test
+    void testFindCorruptedEntries() throws Exception {
+        File outputFile = Files.createTempFile(null, ".txt").toFile();
+        int pageSize = 100;
+        DiffFinder.writeCorruptedAccountsToFile(oldDbTemplate, newDbTemplate, pageSize, outputFile);
+
+        String outputFileString;
+        try(FileReader reader = new FileReader(outputFile)){
+            outputFileString = IOUtils.toString(reader);
+        }
+
+        String expectedFileString = IOUtils.toString(getResourceAsStream("corruptedAccountsExpected.txt"), StandardCharsets.UTF_8);
+
+        assertThat(outputFileString, Matchers.is(expectedFileString));
     }
 
-    private JdbcTemplate createJdbcTemplate() throws IOException {
+    private static InputStream getResourceAsStream(String resource){
+        return DiffFinderTest.class.getClassLoader().getResourceAsStream(resource);
+    }
+
+    /*
+    Creates a jdbc template along with an h2 db backed by a temp directory
+     */
+    private static JdbcTemplate createJdbcTemplate() throws IOException {
         Path tempDir = Files.createTempDirectory(null);
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("org.h2.Driver");

@@ -3,7 +3,8 @@ DROP TABLE IF EXISTS accounts;
 CREATE TABLE accounts (
     id VARCHAR(200) PRIMARY KEY,
 	name VARCHAR(200) NOT NULL,
-	email VARCHAR(200) NOT NULL
+	email VARCHAR(200) NOT NULL,
+	favorite_flavor VARCHAR(200) DEFAULT 'chocolate' NOT NULL
 );
 
 --compared to the original, Aliese and Tangee are missing, two are corrupted (fields have value 'corrupted'), and 'Kyle' is new

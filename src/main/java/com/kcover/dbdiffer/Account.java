@@ -56,12 +56,16 @@ public class Account {
             throw new RuntimeException("ID was unexpected type of: " + id.getClass());
         }
         if(!(name instanceof String)){
-            throw new RuntimeException("ID was unexpected type of: " + id.getClass());
+            throw new RuntimeException("Name was unexpected type of: " + name.getClass());
         }
         if(!(email instanceof String)){
-            throw new RuntimeException("ID was unexpected type of: " + id.getClass());
+            throw new RuntimeException("Email was unexpected type of: " + email.getClass());
         }
         return new Account((String) id,(String) name,(String) email);
+    }
+
+    public String toSqlValue(){
+        return String.format("('%s', '%s', '%s')", getId(), getName(), getEmail());
     }
 
     @Override
