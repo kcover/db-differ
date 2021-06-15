@@ -37,6 +37,7 @@ public class DbDifferApplication {
 
 		DiffFinder.writeMissingAccountsToFile(oldDbTemplate, newDbTemplate, 1000, new File("missing.txt"));
 		DiffFinder.writeCorruptedAccountsToFile(oldDbTemplate, newDbTemplate, 1000, new File("corrupted.txt"));
+		DiffFinder.writeNewAccountsToFile(oldDbTemplate, newDbTemplate, 1000, new File("new.txt"));
 	}
 
 

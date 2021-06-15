@@ -20,13 +20,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 class DiffFinderTest {
 
-    @Test
-    void test() throws Exception {
-        for (int i = 0; i < 10; i++) {
-            System.out.println(UUID.randomUUID());
-        }
-    }
-
     private static JdbcTemplate oldDbTemplate;
     private static JdbcTemplate newDbTemplate;
 
@@ -43,7 +36,8 @@ class DiffFinderTest {
     @Test
     void testFindMissingEntries() throws Exception{
         File outputFile = Files.createTempFile(null, ".txt").toFile();
-        int pageSize = 100;
+        //Use page size 1 to check for off by 1 errors
+        int pageSize = 1;
         DiffFinder.writeMissingAccountsToFile(oldDbTemplate, newDbTemplate, pageSize, outputFile);
 
         String outputFileString;
@@ -58,7 +52,7 @@ class DiffFinderTest {
     @Test
     void testFindCorruptedEntries() throws Exception {
         File outputFile = Files.createTempFile(null, ".txt").toFile();
-        int pageSize = 100;
+        int pageSize = 1;
         DiffFinder.writeCorruptedAccountsToFile(oldDbTemplate, newDbTemplate, pageSize, outputFile);
 
         String outputFileString;
@@ -70,6 +64,24 @@ class DiffFinderTest {
 
         assertThat(outputFileString, Matchers.is(expectedFileString));
     }
+
+    @Test
+    void testFindNewEntries() throws Exception {
+        File outputFile = Files.createTempFile(null, ".txt").toFile();
+        int pageSize = 1;
+        DiffFinder.writeNewAccountsToFile(oldDbTemplate, newDbTemplate, pageSize, outputFile);
+
+        String outputFileString;
+        try(FileReader reader = new FileReader(outputFile)){
+            outputFileString = IOUtils.toString(reader);
+        }
+
+        String expectedFileString = IOUtils.toString(getResourceAsStream("newAccountsExpected.txt"), StandardCharsets.UTF_8);
+
+        assertThat(outputFileString, Matchers.is(expectedFileString));
+    }
+
+
 
     private static InputStream getResourceAsStream(String resource){
         return DiffFinderTest.class.getClassLoader().getResourceAsStream(resource);
