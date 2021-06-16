@@ -1,0 +1,10 @@
+MISSING ACCOUNTS:
+('0004ddc3-e99a-419e-b14b-e91a2138416e', 'Aliese', 'Aliese48905@yahoo.com'),
+('000846f0-1043-414e-8ad2-7ad4955c6833', 'Tangee', 'Tangee67363@aim.chat'),
+
+CORRUPTED ACCOUNTS:
+('00030892-617a-4e7d-8e21-cb1aa3330850', 'corrupted', 'Noella102413@gmail.com', 'chocolate'),
+('0004b816-9d35-4900-a8d1-5c6fd9ecc9c6', 'Cintia', 'corrupted', 'chocolate'),
+
+NEW ACCOUNTS:
+('fd76af36-cafb-4a80-8f2c-f185a92c15f4', 'Kyle', 'kyle88511@hotmail.com', 'chocolate'),

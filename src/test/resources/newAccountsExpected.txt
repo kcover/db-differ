@@ -1,2 +1,1 @@
-NEW ACCOUNTS:
 ('fd76af36-cafb-4a80-8f2c-f185a92c15f4', 'Kyle', 'kyle88511@hotmail.com', 'chocolate'),

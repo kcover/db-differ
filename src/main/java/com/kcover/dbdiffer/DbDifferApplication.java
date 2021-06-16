@@ -3,24 +3,18 @@ package com.kcover.dbdiffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
-import java.io.File;
-import java.sql.ResultSet;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.logging.Level;
 
-@SpringBootApplication
 public class DbDifferApplication {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DbDifferApplication.class);
 
 	public static void main(String[] args) {
 		SpringApplication.run(DbDifferApplication.class, args);
-		System.out.println("Started");
 		DriverManagerDataSource oldDbDataSource = new DriverManagerDataSource();
 		oldDbDataSource.setDriverClassName("org.postgresql.Driver");
 		oldDbDataSource.setUrl("jdbc:postgresql://localhost:5432/old");
@@ -35,9 +29,12 @@ public class DbDifferApplication {
 		newDbDataSource.setPassword("hahaha");
 		JdbcTemplate newDbTemplate = new JdbcTemplate(newDbDataSource);
 
-		DiffFinder.writeMissingAccountsToFile(oldDbTemplate, newDbTemplate, 1000, new File("missing.txt"));
-		DiffFinder.writeCorruptedAccountsToFile(oldDbTemplate, newDbTemplate, 1000, new File("corrupted.txt"));
-		DiffFinder.writeNewAccountsToFile(oldDbTemplate, newDbTemplate, 1000, new File("new.txt"));
+		LOGGER.info("Writing report...");
+		try(FileWriter reportWriter = new FileWriter("report.txt")) {
+			DiffFinder.writeDiffReportToFile(oldDbTemplate, newDbTemplate, 1000, reportWriter);
+		} catch (IOException e){
+			throw new RuntimeException("IO error occurred while creating filewriter to write report.", e);
+		}
 	}
 
 

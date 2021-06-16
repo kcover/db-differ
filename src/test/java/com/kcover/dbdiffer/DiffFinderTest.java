@@ -9,12 +9,12 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -38,7 +38,9 @@ class DiffFinderTest {
         File outputFile = Files.createTempFile(null, ".txt").toFile();
         //Use page size 1 to check for off by 1 errors
         int pageSize = 1;
-        DiffFinder.writeMissingAccountsToFile(oldDbTemplate, newDbTemplate, pageSize, outputFile);
+        try(FileWriter fileWriter = new FileWriter(outputFile)) {
+            DiffFinder.writeMissingAccountsToFile(oldDbTemplate, newDbTemplate, pageSize, fileWriter);
+        }
 
         String outputFileString;
         try(FileReader reader = new FileReader(outputFile)){
@@ -53,7 +55,9 @@ class DiffFinderTest {
     void testFindCorruptedEntries() throws Exception {
         File outputFile = Files.createTempFile(null, ".txt").toFile();
         int pageSize = 1;
-        DiffFinder.writeCorruptedAccountsToFile(oldDbTemplate, newDbTemplate, pageSize, outputFile);
+        try(FileWriter fileWriter = new FileWriter(outputFile)) {
+            DiffFinder.writeCorruptedAccountsToFile(oldDbTemplate, newDbTemplate, pageSize, fileWriter);
+        }
 
         String outputFileString;
         try(FileReader reader = new FileReader(outputFile)){
@@ -69,7 +73,9 @@ class DiffFinderTest {
     void testFindNewEntries() throws Exception {
         File outputFile = Files.createTempFile(null, ".txt").toFile();
         int pageSize = 1;
-        DiffFinder.writeNewAccountsToFile(oldDbTemplate, newDbTemplate, pageSize, outputFile);
+        try(FileWriter fileWriter = new FileWriter(outputFile)) {
+            DiffFinder.writeNewAccountsToFile(oldDbTemplate, newDbTemplate, pageSize, fileWriter);
+        }
 
         String outputFileString;
         try(FileReader reader = new FileReader(outputFile)){
@@ -77,6 +83,60 @@ class DiffFinderTest {
         }
 
         String expectedFileString = IOUtils.toString(getResourceAsStream("newAccountsExpected.txt"), StandardCharsets.UTF_8);
+
+        assertThat(outputFileString, Matchers.is(expectedFileString));
+    }
+
+    @Test
+    void testFullReport() throws Exception {
+        File outputFile = Files.createTempFile(null, ".txt").toFile();
+        int pageSize = 1;
+        try(FileWriter fileWriter = new FileWriter(outputFile)) {
+            DiffFinder.writeDiffReportToFile(oldDbTemplate, newDbTemplate, pageSize, fileWriter);
+        }
+
+        String outputFileString;
+        try(FileReader reader = new FileReader(outputFile)){
+            outputFileString = IOUtils.toString(reader);
+        }
+
+        String expectedFileString = IOUtils.toString(getResourceAsStream("fullReportExpected.txt"), StandardCharsets.UTF_8);
+
+        assertThat(outputFileString, Matchers.is(expectedFileString));
+    }
+
+    @Test
+    void testFullReportPageSize2() throws Exception {
+        File outputFile = Files.createTempFile(null, ".txt").toFile();
+        int pageSize = 2;
+        try(FileWriter fileWriter = new FileWriter(outputFile)) {
+            DiffFinder.writeDiffReportToFile(oldDbTemplate, newDbTemplate, pageSize, fileWriter);
+        }
+
+        String outputFileString;
+        try(FileReader reader = new FileReader(outputFile)){
+            outputFileString = IOUtils.toString(reader);
+        }
+
+        String expectedFileString = IOUtils.toString(getResourceAsStream("fullReportExpected.txt"), StandardCharsets.UTF_8);
+
+        assertThat(outputFileString, Matchers.is(expectedFileString));
+    }
+
+    @Test
+    void testFullReportPageSizeGreaterThanResultCount() throws Exception {
+        File outputFile = Files.createTempFile(null, ".txt").toFile();
+        int pageSize = 100;
+        try(FileWriter fileWriter = new FileWriter(outputFile)) {
+            DiffFinder.writeDiffReportToFile(oldDbTemplate, newDbTemplate, pageSize, fileWriter);
+        }
+
+        String outputFileString;
+        try(FileReader reader = new FileReader(outputFile)){
+            outputFileString = IOUtils.toString(reader);
+        }
+
+        String expectedFileString = IOUtils.toString(getResourceAsStream("fullReportExpected.txt"), StandardCharsets.UTF_8);
 
         assertThat(outputFileString, Matchers.is(expectedFileString));
     }
